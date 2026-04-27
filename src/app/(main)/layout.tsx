@@ -2,6 +2,8 @@ import Sidebar from '@/components/Sidebar'
 import BackgroundVideo from '@/components/ui/BackgroundVideo'
 import Overlay from '@/components/ui/Overlay'
 
+export const dynamic = 'force-dynamic'
+
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="relative isolate flex min-h-screen text-fg">
