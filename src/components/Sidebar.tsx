@@ -54,24 +54,24 @@ export default function Sidebar() {
 
   return (
     <aside
-      className={`sticky top-0 relative flex h-screen shrink-0 flex-col border-r border-white/10 bg-white/5 px-4 py-8 transition-[width] duration-200 anim-sidebar-slide ${widthClass}`}
+      className={`sticky top-0 relative flex h-screen shrink-0 flex-col border-r border-white/10 bg-white/5 px-4 py-8 transition-[width] duration-100 anim-sidebar-slide ${widthClass}`}
       suppressHydrationWarning
     >
       {/* Logo */}
       <button
         type="button"
         onClick={toggle}
-        className={`flex w-full rounded-[var(--radius-side)] px-2 py-2 text-left transition-colors anim-sidebar-logo ${
-          collapsed ? 'justify-center' : ''
-        }`}
+        className="flex w-full items-center justify-center rounded-[var(--radius-side)] px-2 py-2 transition-colors anim-sidebar-logo"
         title={collapsed ? '展开侧边栏' : '收起侧边栏'}
       >
-        <Image
-          src={collapsed ? logoWhite : logoHome}
-          alt="Gift Master"
-          className={collapsed ? 'h-8 w-auto object-contain' : 'h-8 w-auto object-contain'}
-          priority
-        />
+        <div className="flex h-16 w-full items-center justify-center">
+          <Image
+            src={collapsed ? logoWhite : logoHome}
+            alt="Gift Master"
+            className={collapsed ? 'h-8 w-auto object-contain' : 'h-16 w-auto object-contain'}
+            priority
+          />
+        </div>
       </button>
 
       {/* Nav */}
