@@ -549,7 +549,7 @@ export default function SettingsPage() {
     // cookie: 弹出粘贴 Modal
     if (action === 'cookie') {
       const item = baConfigs.find((c) => c.id === id)
-      const loginUrl = item?.benchBaseUrl ?? ''
+      const loginUrl = item?.roomUrl ?? ''
       setBaCookieModal({ configId: id, loginUrl })
       return
     }

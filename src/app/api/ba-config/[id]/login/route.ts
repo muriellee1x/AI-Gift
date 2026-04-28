@@ -18,11 +18,9 @@ export const POST = apiHandler(async (
     throw new ApiError('NOT_FOUND')
   }
 
-  const benchBaseUrl = config.benchBaseUrl || resolveBenchBaseUrl(config.roomUrl)
-
   return NextResponse.json({
     success: true,
-    loginUrl: benchBaseUrl,
+    loginUrl: config.roomUrl,
     message: '请在新窗口中登录 ByteArtist，登录完成后回到此页面粘贴 Cookie。',
   })
 })
