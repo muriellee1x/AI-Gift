@@ -23,7 +23,7 @@
 
 **唯一前提**：安装 [Docker Desktop](https://docs.docker.com/get-docker/)（Windows / macOS / Linux 均支持）
 
-### 方式一：拉取预构建镜像（推荐，最简单）
+### 拉取预构建镜像
 
 无需克隆仓库，一条命令下载配置文件，另一条命令启动所有服务：
 
