@@ -47,9 +47,6 @@ docker compose up -d
 
 打开浏览器访问 [http://localhost:13000](http://localhost:13000) 开始使用。
 
-> [!WARNING]
-> 本版本为体验版，`docker-compose.yml` 中的密钥均为公开默认值，**请勿用于生产环境**。生产部署请参考 [生产环境配置](#生产环境配置) 章节。
-
 #### 升级到新版本
 
 ```bash
