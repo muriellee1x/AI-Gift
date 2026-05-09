@@ -182,19 +182,26 @@ async function submitTask(
   apiKey: string,
   model: string,
   content: ContentItem[],
-  options: { ratio: string; duration: number },
+  options: { ratio: string; duration?: number },
 ): Promise<string> {
   const url = resolveTasksUrl(baseUrl)
 
-  const requestBody = {
+  const hasReferenceVideo = content.some((c) => c.type === 'video_url')
+
+  const requestBody: Record<string, unknown> = {
     model,
     content,
     ratio: options.ratio,
-    duration: options.duration,
     watermark: false,
   }
 
-  console.log(`[video-call] submitTask to ${url} | model=${model} | content_items=${content.length} | ratio=${options.ratio} | duration=${options.duration}`)
+  // r2v mode (reference_video present) does not accept duration; the API derives
+  // it from the reference video. Only pass duration in t2v / i2v mode.
+  if (!hasReferenceVideo && options.duration != null) {
+    requestBody.duration = options.duration
+  }
+
+  console.log(`[video-call] submitTask to ${url} | model=${model} | content_items=${content.length} | ratio=${options.ratio} | duration=${hasReferenceVideo ? '(omitted, r2v mode)' : options.duration}`)
 
   const res = await fetch(url, {
     method: 'POST',
@@ -336,7 +343,7 @@ export async function callUserVideoAPI(
     content,
     {
       ratio: options?.ratio || '16:9',
-      duration: options?.duration || 5,
+      duration: resolvedVideoUrl ? undefined : (options?.duration || 5),
     },
   )
 

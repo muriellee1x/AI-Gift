@@ -116,10 +116,10 @@ export default function ReskinImageGenerateStep({
   return (
     <>
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
-        {/* 左：图像预览区 */}
-        <div>
+        {/* 左：图像预览 MediaCard */}
+        <div className="content-card flex flex-col p-6">
           <p className="mb-4 text-h4">生成图像</p>
-          <div className="flex h-[500px] items-center justify-center overflow-hidden rounded-[var(--radius-card)] border border-white/10 bg-black/25">
+          <div className="flex flex-1 items-center justify-center overflow-hidden rounded-[var(--radius-card)] border border-white/10 bg-black/25" style={{ minHeight: '420px' }}>
             {hasImage ? (
               <MediaFrame
                 type="image"
@@ -133,8 +133,8 @@ export default function ReskinImageGenerateStep({
           </div>
         </div>
 
-        {/* 右：提示词编辑区 + 操作按钮 */}
-        <div>
+        {/* 右：提示词 MediaCard，含操作按钮（不含提交） */}
+        <div className="content-card flex flex-col p-6">
           <p className="mb-4 text-h4">图像提示词</p>
           <div className="inbox-prompt-box relative p-0 pr-2">
             <textarea
@@ -185,17 +185,20 @@ export default function ReskinImageGenerateStep({
             >
               {generating ? '生成中...' : hasImage ? '重新生成' : '开始生成'}
             </button>
-
-            <button
-              type="button"
-              onClick={onSubmit}
-              disabled={isLoading || !hasImage || !imageStorageKey}
-              className="btn-gradient"
-            >
-              {submitting ? '生成中...' : '提示词生成'}
-            </button>
           </div>
         </div>
+      </div>
+
+      {/* 提交按钮独立在两栏之外，右对齐 */}
+      <div className="flex justify-end">
+        <button
+          type="button"
+          onClick={onSubmit}
+          disabled={isLoading || !hasImage || !imageStorageKey}
+          className="btn-gradient"
+        >
+          {submitting ? '生成中...' : '提示词生成'}
+        </button>
       </div>
 
       {/* 编辑图像弹窗 */}
