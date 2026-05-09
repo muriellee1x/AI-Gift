@@ -117,9 +117,9 @@ export default function ReskinImageGenerateStep({
     <>
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
         {/* 左：图像预览 MediaCard */}
-        <div className="content-card flex flex-col p-6">
+        <div className="content-card flex h-[500px] flex-col p-6">
           <p className="mb-4 text-h4">生成图像</p>
-          <div className="flex flex-1 items-center justify-center overflow-hidden rounded-[var(--radius-card)] border border-white/10 bg-black/25" style={{ minHeight: '420px' }}>
+          <div className="flex flex-1 items-center justify-center overflow-hidden rounded-[var(--radius-card)] border border-white/10 bg-black/25">
             {hasImage ? (
               <MediaFrame
                 type="image"
@@ -134,11 +134,11 @@ export default function ReskinImageGenerateStep({
         </div>
 
         {/* 右：提示词 MediaCard，含操作按钮（不含提交） */}
-        <div className="content-card flex flex-col p-6">
+        <div className="content-card flex h-[500px] flex-col p-6">
           <p className="mb-4 text-h4">图像提示词</p>
-          <div className="inbox-prompt-box relative p-0 pr-2">
+          <div className="inbox-prompt-box relative flex-1 overflow-hidden p-0 pr-2">
             <textarea
-              className="scrollbar-prompt min-h-[420px] w-full resize-none rounded-[var(--radius-card)] border-0 bg-transparent p-5 text-body outline-none placeholder:text-fg3"
+              className="scrollbar-prompt h-full w-full resize-none rounded-[var(--radius-card)] border-0 bg-transparent p-5 text-body outline-none placeholder:text-fg3"
               value={promptText}
               onChange={(e) => onPromptChange(e.target.value)}
               placeholder="这里会展示上一步生成的图像提示词，可以继续编辑"

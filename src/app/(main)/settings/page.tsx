@@ -815,7 +815,7 @@ export default function SettingsPage() {
                         <button
                           type="button"
                           onClick={() => handleBaAction(item.id, 'test')}
-                          disabled={!item.hasCookie || (actionState?.action === 'test' && actionState.status === 'loading')}
+                          disabled={actionState?.action === 'test' && actionState.status === 'loading'}
                           className="sub-btn-tab"
                         >
                           {actionState?.action === 'test' && actionState.status === 'loading' ? '测试中...' : '测试连接'}
@@ -857,8 +857,16 @@ export default function SettingsPage() {
           configId={baCookieModal.configId}
           loginUrl={baCookieModal.loginUrl}
           onSuccess={async () => {
+            const savedId = baCookieModal?.configId
             setBaCookieModal(null)
-            await fetchBaConfigs()
+            if (savedId) {
+              setBaActionStatus((prev) => {
+                const next = { ...prev }
+                delete next[savedId]
+                return next
+              })
+            }
+            try { await fetchBaConfigs() } catch { /* cookie 已保存成功，忽略列表刷新失败 */ }
           }}
           onClose={() => setBaCookieModal(null)}
         />
