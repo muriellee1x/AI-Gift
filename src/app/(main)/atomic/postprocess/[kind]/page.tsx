@@ -431,13 +431,11 @@ export default function PostprocessPage({
       }
 
       if (videoPair) {
-        const [bgBlob, openClawBlob, configBlob] = await Promise.all([
-          fetchAsBlob(videoPair.bg.videoUrl),
+        const [openClawBlob, configBlob] = await Promise.all([
           fetchAsBlob(videoPair.openClaw.videoUrl),
           fetchAsBlob(videoPair.configUrl),
         ])
-        zip.file(videoPair.bg.filename || 'BGOutput.mp4', bgBlob)
-        zip.file(videoPair.openClaw.filename || 'OpenClawOutput.mp4', openClawBlob)
+        zip.file('output.mp4', openClawBlob)
         zip.file('config.json', configBlob)
         const content = await zip.generateAsync({ type: 'blob' })
         saveAs(content, `${config.name}-assets.zip`)

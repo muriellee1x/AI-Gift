@@ -172,15 +172,11 @@ export default function PostprocessComposeStep({
       for (const output of outputs) {
         const safeName = output.sourceLabel.replace(/[\\/:*?"<>|]/g, '_')
         const folder = zip.folder(safeName) || zip
-        const [sourceBlob, bgBlob, openClawBlob, configBlob] = await Promise.all([
-          fetchAsBlob(output.sourceUrl),
-          fetchAsBlob(output.bg.videoUrl),
+        const [openClawBlob, configBlob] = await Promise.all([
           fetchAsBlob(output.openClaw.videoUrl),
           fetchAsBlob(output.configUrl),
         ])
-        folder.file(`source-${safeName}.mp4`, sourceBlob)
-        folder.file(output.bg.filename || 'BGOutput.mp4', bgBlob)
-        folder.file(output.openClaw.filename || 'OpenClawOutput.mp4', openClawBlob)
+        folder.file('output.mp4', openClawBlob)
         folder.file('config.json', configBlob)
       }
       const content = await zip.generateAsync({ type: 'blob' })

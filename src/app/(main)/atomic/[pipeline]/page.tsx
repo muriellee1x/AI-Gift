@@ -582,26 +582,24 @@ export default function PipelinePage({
   }, [advanceTo, imageUrl, runPipelineStage, saveProject, selectedRoomId, videoKey])
 
   const handleDownload = useCallback(async () => {
-    if (!bgVideoUrl || !openClawVideoUrl || !configUrl) return
+    if (!openClawVideoUrl || !configUrl) return
     try {
       const zip = new JSZip()
-      const [bgRes, openClawRes, configRes] = await Promise.all([
-        fetch(bgVideoUrl),
+      const [openClawRes, configRes] = await Promise.all([
         fetch(openClawVideoUrl),
         fetch(configUrl),
       ])
-      if (!bgRes.ok || !openClawRes.ok || !configRes.ok) {
+      if (!openClawRes.ok || !configRes.ok) {
         throw new Error('打包下载文件失败')
       }
-      zip.file('BGOutput.mp4', await bgRes.blob())
-      zip.file('OpenClawOutput.mp4', await openClawRes.blob())
+      zip.file('output.mp4', await openClawRes.blob())
       zip.file('config.json', await configRes.text())
       const content = await zip.generateAsync({ type: 'blob' })
       saveAs(content, `${config.name}-assets.zip`)
     } catch (err) {
       alert(err instanceof Error ? err.message : '打包下载失败')
     }
-  }, [bgVideoUrl, config.name, configUrl, openClawVideoUrl])
+  }, [config.name, configUrl, openClawVideoUrl])
 
   if (!config) {
     return <div className="py-20 text-center text-body text-fg3">未知管线类型：{pipeline}</div>
@@ -788,7 +786,7 @@ export default function PipelinePage({
             </div>
 
             <div className="flex justify-end">
-              <button type="button" onClick={handleDownload} disabled={!bgVideoUrl || !openClawVideoUrl || !configUrl} className="btn-gradient">
+              <button type="button" onClick={handleDownload} disabled={!openClawVideoUrl || !configUrl} className="btn-gradient">
                 打包下载
               </button>
             </div>
