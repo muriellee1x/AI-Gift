@@ -512,17 +512,18 @@ async function waitForHistory(
 
     const statusStr = entry.status?.status_str ?? ''
     if (statusStr === 'error' || statusStr === 'failed') {
-      // #region agent log
-      console.error('[debug-aca750] BA workflow failed status:', JSON.stringify(entry.status))
-      console.error('[debug-aca750] BA workflow failed entry keys:', Object.keys(entry))
-      fetch('http://127.0.0.1:7460/ingest/112399fa-f68d-476a-b8de-c0e18c1051b4',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'aca750'},body:JSON.stringify({sessionId:'aca750',location:'ba-pipeline.ts:waitForHistory',message:'BA workflow failed - full entry.status',hypothesisId:'C',data:{statusStr,statusFull:entry.status,entryKeys:Object.keys(entry)},timestamp:Date.now()})}).catch(()=>{})
-      // #endregion
-      const detail = (entry.status?.messages || [])
-        .map((message) => message.message || message.details || '')
-        .filter(Boolean)
-        .join('; ')
-      const fullStatusJson = JSON.stringify(entry.status).slice(0, 800)
-      throw new Error(`BA workflow 执行失败${detail ? `: ${detail}` : ''} | status_dump: ${fullStatusJson}`)
+      const messages = (entry.status?.messages || []) as Array<[string, Record<string, unknown>]>
+      const execError = messages.find(([type]) => type === 'execution_error')
+      const execDetail = execError
+        ? `node ${execError[1].node_id} (${execError[1].node_type}): ${String(execError[1].exception_message || '').slice(0, 300)}`
+        : (entry.status?.messages || [])
+            .map((m: unknown) => {
+              const msg = m as Record<string, string>
+              return msg.message || msg.details || ''
+            })
+            .filter(Boolean)
+            .join('; ')
+      throw new Error(`BA workflow 执行失败${execDetail ? `: ${execDetail}` : ''}`)
     }
 
     if (entry.status?.completed) {
@@ -554,14 +555,9 @@ export async function runPipelineStage(
   if ((stage === 'image' || stage === 'video') && stageConfig.textNodes?.length) {
     report(10, '注入提示词...')
     injectBindings(apiPrompt, stageConfig.textNodes, input.prompt, 'prompt')
-  } else if (stage === 'post' && stageConfig.textNodes?.length) {
-    // #region agent log
-    fetch('http://127.0.0.1:7460/ingest/112399fa-f68d-476a-b8de-c0e18c1051b4',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'aca750'},body:JSON.stringify({sessionId:'aca750',location:'ba-pipeline.ts:runPipelineStage:text',message:'post stage text injection check',hypothesisId:'B',data:{inputText:input.text,hasText:!!input.text?.trim(),textNodes:stageConfig.textNodes},timestamp:Date.now()})}).catch(()=>{})
-    // #endregion
-    if (input.text?.trim()) {
-      report(10, '注入 post 文本...')
-      injectBindings(apiPrompt, stageConfig.textNodes, input.text, 'text')
-    }
+  } else if (stage === 'post' && stageConfig.textNodes?.length && input.text?.trim()) {
+    report(10, '注入 post 文本...')
+    injectBindings(apiPrompt, stageConfig.textNodes, input.text, 'text')
   }
 
   report(15, '获取 BA 配置...')
@@ -580,10 +576,6 @@ export async function runPipelineStage(
     if (!input.imageKey) throw new Error('imageKey is required')
     report(18, '上传参考图片到 BA 房间...')
     const uploadedImageName = await maybeUploadReferenceImage(baConfig.benchBaseUrl, cookie, input.imageKey)
-    // #region agent log
-    console.log('[debug-aca750] image upload result:', uploadedImageName, 'imageNodes:', JSON.stringify(stageConfig.imageNodes))
-    fetch('http://127.0.0.1:7460/ingest/112399fa-f68d-476a-b8de-c0e18c1051b4',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'aca750'},body:JSON.stringify({sessionId:'aca750',location:'ba-pipeline.ts:runPipelineStage:image',message:'image upload result and injection',hypothesisId:'D',data:{uploadedImageName,imageNodes:stageConfig.imageNodes,nodeInputAfter:(apiPrompt[stageConfig.imageNodes[0].id] as {inputs?:Record<string,unknown>})?.inputs},timestamp:Date.now()})}).catch(()=>{})
-    // #endregion
     injectBindings(apiPrompt, stageConfig.imageNodes, uploadedImageName, 'image')
   }
 
@@ -591,10 +583,6 @@ export async function runPipelineStage(
     if (!input.videoKey) throw new Error('videoKey is required')
     report(18, '上传参考视频到 BA 房间...')
     const uploadedVideoName = await maybeUploadReferenceVideo(baConfig.benchBaseUrl, cookie, input.videoKey)
-    // #region agent log
-    console.log('[debug-aca750] video upload result:', uploadedVideoName, 'videoNodes:', JSON.stringify(stageConfig.videoNodes))
-    fetch('http://127.0.0.1:7460/ingest/112399fa-f68d-476a-b8de-c0e18c1051b4',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'aca750'},body:JSON.stringify({sessionId:'aca750',location:'ba-pipeline.ts:runPipelineStage:video',message:'video upload result and injection',hypothesisId:'A',data:{uploadedVideoName,videoNodes:stageConfig.videoNodes,node763inputs:(apiPrompt['763'] as {inputs?:Record<string,unknown>})?.inputs},timestamp:Date.now()})}).catch(()=>{})
-    // #endregion
     injectBindings(apiPrompt, stageConfig.videoNodes, uploadedVideoName, 'video')
   }
 
@@ -686,7 +674,7 @@ export async function runPipelineStage(
   ])
 
   report(92, '生成 config.json...')
-  const config = await generateVideoConfig(openClaw.buffer, openClaw.filename)
+  const config = await generateVideoConfig(openClaw.buffer)
   const configKey = generateUniqueKey(`pipeline/${kind}/${stage}`, 'json')
   const storedConfigKey = await uploadObject(
     Buffer.from(JSON.stringify(config)),

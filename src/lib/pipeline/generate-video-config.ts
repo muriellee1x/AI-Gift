@@ -106,10 +106,9 @@ async function probeVideo(videoPath: string): Promise<VideoProbeInfo> {
 
 export async function generateVideoConfig(
   videoBuffer: Buffer,
-  filename: string,
 ): Promise<VideoConfig> {
   const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'video-config-'))
-  const videoPath = path.join(tmpDir, filename)
+  const videoPath = path.join(tmpDir, 'output.mp4')
 
   try {
     await fs.writeFile(videoPath, videoBuffer)
@@ -121,7 +120,7 @@ export async function generateVideoConfig(
     return {
       portrait: {
         v: 1,
-        path: filename,
+        path: 'output.mp4',
         align,
         has_audio: 0,
         f: info.frameCount,
