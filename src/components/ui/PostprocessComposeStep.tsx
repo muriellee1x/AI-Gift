@@ -170,14 +170,12 @@ export default function PostprocessComposeStep({
     try {
       const zip = new JSZip()
       for (const output of outputs) {
-        const safeName = output.sourceLabel.replace(/[\\/:*?"<>|]/g, '_')
-        const folder = zip.folder(safeName) || zip
         const [openClawBlob, configBlob] = await Promise.all([
           fetchAsBlob(output.openClaw.videoUrl),
           fetchAsBlob(output.configUrl),
         ])
-        folder.file('config.json', configBlob)
-        folder.file('output.mp4', openClawBlob)
+        zip.file('config.json', configBlob)
+        zip.file('output.mp4', openClawBlob)
       }
       const content = await zip.generateAsync({ type: 'blob' })
       saveAs(content, '资产合成-results.zip')
